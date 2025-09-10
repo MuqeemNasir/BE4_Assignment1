@@ -1,11 +1,22 @@
 const express = require('express')
+const cors = require('cors')
+const app = express()
+
 const { initializeDatabase } = require('./db/db.connect')
 const Book = require('./models/book.model')
 
-const app = express()
+const corsOptions = {
+    origin: "*",
+    credentials: true,
+    optionSuccessStatus: 200,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 initializeDatabase()
+// 1. Create an API with route "/books" to create a new book data in the books Database.
+//    Make sure to do error handling.
 
 app.post("/book", async(req, res) => {
     try{
@@ -19,6 +30,8 @@ app.post("/book", async(req, res) => {
     }
 })
 
+// 3. Create an API to get all the books in the database as response. 
+//      Make sure to do error handling.
 
 app.get("/book", async(req, res) => {
     try{
@@ -33,6 +46,25 @@ app.get("/book", async(req, res) => {
     }
 })
 
+// 4. Create an API to get a book's detail by its title. 
+//      Make sure to do error handling.
+
+app.get("/book/title/:bookTitle", async(req, res) => {
+    try{
+        const book = await Book.findOne({title: req.params.bookTitle})
+        if(book){
+            res.status(200).json(book)
+        }else{
+            res.status(404).json({error: "Book not found."})
+        }
+    }catch(error){
+        res.status(500).json({error: "Failed to fetch book by title."})
+    }
+})
+
+// 5. Create an API to get details of all the books by an author.
+//       Make sure to do error handling.
+
 app.get("/book/author/:author", async(req, res) => {
     try{
         const books = await Book.find({author: req.params.author})
@@ -45,6 +77,8 @@ app.get("/book/author/:author", async(req, res) => {
         res.status(500).json({error: "Failed to fetch books by author."})
     }
 })
+
+// 6. Create an API to get all the books which are of "Business" genre.
 
 app.get("/book/genre/:genre", async(req, res) => {
     try{
@@ -59,6 +93,8 @@ app.get("/book/genre/:genre", async(req, res) => {
     }
 })
 
+// 7. Create an API to get all the books which was released in the year 2012.
+
 app.get("/book/publishedYear/:releasedYear", async(req, res) => {
     try{
         const books = await Book.find({publishedYear: req.params.releasedYear})
@@ -71,6 +107,12 @@ app.get("/book/publishedYear/:releasedYear", async(req, res) => {
         res.status(500).json({error: "Failed to fetch books by releasedYear."})
     }
 })
+
+// 8. Create an API to update a book's rating with the help of its id. Update the rating of the
+//  "Lean In" from 4.1 to 4.5. Send an error message "Book does not exist", in case that book is 
+//  not found. Make sure to do error handling.
+
+// Updated book rating: { "rating": 4.5 }
 
 async function updateBookById(bookId, dataToUpdate) {
     try{
@@ -95,6 +137,12 @@ app.post("/book/:bookId", async(req, res) => {
     }
 })
 
+// 9. Create an API to update a book's rating with the help of its title. Update the details
+//   of the book "Shoe Dog". Use the query .findOneAndUpdate() for this. Send an error message 
+//  "Book does not exist", in case that book is not found. Make sure to do error handling.
+
+// Updated book data: { "publishedYear": 2017, "rating": 4.2 }
+
 async function updateBookByTitle(bookTitle, dataToUpdate){
     try{
         const updatedBook = await Book.findOneAndUpdate({title: bookTitle}, dataToUpdate, {new: true})
@@ -117,6 +165,9 @@ app.post("/book/title/:bookTitle", async(req, res) => {
         res.status(500).json({error: "Failed to update books by title."})
     }
 })
+
+// 10. Create an API to delete a book with the help of a book id, Send an error message "Book not found"
+//       in case the book does not exist. Make sure to do error handling.
 
 app.delete("/book/:bookId", async(req, res) => {
     try{
