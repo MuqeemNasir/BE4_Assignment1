@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const serverless = require('serverless-http')
 const app = express()
 
 const { initializeDatabase } = require('./db/db.connect')
@@ -184,8 +185,12 @@ app.delete("/book/:bookId", async(req, res) => {
 
 
 
-const PORT = 3000
+// const PORT = 3000
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-})
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`)
+// })
+
+module.exports = app
+
+module.exports.handler = serverless(app)
